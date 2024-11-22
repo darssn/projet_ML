@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.metrics import precision_recall_fscore_support as score
@@ -64,11 +64,15 @@ with tabs_3:
     st.header("Modélisation")
     data = load_data()
 
-    st.write("type de colonne :", data.dtypes)
-
     target = st.selectbox("Choisissez une colonne cible", options=data.columns)
     y = data[target]
-    X = data.drop(columns=[target])
+
+    if data[target].dtype == 'object' or data[target].dtype == 'string':
+         X = data.drop(columns=[target])
+    else:
+        X = data.select_dtypes(exclude=['object','string']).drop(columns=[target])
+
+    st.write(X.columns)
 
     model_choice = st.selectbox("Choisissez un algorithme", ["Random Forest", "Linear regression"])
 
@@ -84,7 +88,8 @@ with tabs_3:
 
     if st.button("Entrainer le modèle"):
         if model_choice == "Random Forest":
-            model = RandomForestClassifier(n_estimators=1, max_depth=60)
+            model = RandomForestRegressor(n_estimators=1, max_depth=60)
+            
         
         model = model.fit(X_train, y_train)
         st.success("Modèle entraîné avec succès")
@@ -96,7 +101,7 @@ with tabs_3:
         st.write(X_test)
 
         # Calcul des métriques
-        precision, recall, fscore, _ = score(y_test, result, average='weighted')
+        precision, recall, fscore, _ = score(y_test, result, average='macro')
         accuracy = accuracy_score(y_test, result)
 
         # Affichage des résultats
