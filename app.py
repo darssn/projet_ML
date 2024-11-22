@@ -1,6 +1,10 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.metrics import precision_recall_fscore_support as score
 
 st.set_page_config(
     page_title="Projet ML",
@@ -57,7 +61,74 @@ with tabs_2:
 
 
 with tabs_3:
-    pass
+    st.header("Modélisation")
+    data = load_data()
+
+    st.write("type de colonne :", data.dtypes)
+
+    target = st.selectbox("Choisissez une colonne cible", options=data.columns)
+    y = data[target]
+    X = data.drop(columns=[target])
+
+    model_choice = st.selectbox("Choisissez un algorithme", ["Random Forest", "Linear regression"])
+
+    test_size = st.slider("Taille de l'ensemble de test (%)", 10, 50, 20) / 100
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_size)
+
+    st.write("Taille de l'ensemble d'entraînement :", len(X_train))
+    st.write("Taille de l'ensemble de test :", len(X_test))
+
+    st.write("Distribution des classes dans y_train :", y_train.value_counts())
+    st.write("Distribution des classes dans y_test :", y_test.value_counts())
+
+
+    if st.button("Entrainer le modèle"):
+        if model_choice == "Random Forest":
+            model = RandomForestClassifier(n_estimators=1, max_depth=60)
+        
+        model = model.fit(X_train, y_train)
+        st.success("Modèle entraîné avec succès")
+
+        result = model.predict(X_test)
+
+        X_test["guess_target"] = result
+        X_test["target"] = y_test
+        st.write(X_test)
+
+        # Calcul des métriques
+        precision, recall, fscore, _ = score(y_test, result, average='weighted')
+        accuracy = accuracy_score(y_test, result)
+
+        # Affichage des résultats
+        st.write("**Métriques du modèle :**")
+        st.write(f"- Precision : {round(precision, 3)}")
+        st.write(f"- Recall : {round(recall, 3)}")
+        st.write(f"- F1-score : {round(fscore, 3)}")
+        st.write(f"- Accuracy : {round(accuracy, 3)}")
+    
+
+    # if st.button("Évaluer le modèle"):
+    #     y_pred = model.predict(X_test)
+    #     accuracy = accuracy_score(y_test, y_pred)
+    #     st.write(f"### Précision : {accuracy:.2f}")
+    #     st.text("Rapport de classification")
+    #     st.text(classification_report(y_test, y_pred))
+
 
 with tabs_4:
     pass
+    # st.header("Évaluation")
+
+    # if "model" in st.session_state:
+    #     model = st.session_state["model"]
+    
+    # if st.button("Évaluer le modèle"):
+    #     y_pred = model.predict(X_test)
+    #     accuracy = accuracy_score(y_test, y_pred)
+    #     st.write(f"### Précision : {accuracy:.2f}")
+    #     st.text("Rapport de classification")
+    #     st.text(classification_report(y_test, y_pred))
+    
+
+    # else:
+    #     st.warning("Aucun modèle n'a été entraîné. Veuillez entraîner un modèle avant d'évaluer.")
