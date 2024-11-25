@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.metrics import precision_recall_fscore_support as score
+from sklearn.preprocessing import OneHotEncoder
 
 st.set_page_config(
     page_title="Projet ML",
@@ -21,31 +22,54 @@ def load_data():
     data = data.drop(columns=['Unnamed: 0'])
     return data
 
+
 # Traitement de données 
 with tabs_1:
     st.header("Traitement de données")
     data = load_data()
-
     st.write("Données du fichier")
     st.dataframe(data)
-
+    
+    # Suppression d'une colonne
     select = st.multiselect("Sélectionner une colonne à supprimer", options=data.columns)
 
     if st.button(label="Supprimer"):
         data = data.drop(columns=select)
-        st.write(f'La colonne {select} à bien été supprimée')
+        if len(select) > 1:
+            st.success(f'Les colonnes {select} ont bien été supprimées')
+        else:
+            st.success(f'La colonne {select} a bien été supprimée')
         st.write("Données mises à jour")
-        st.dataframe(data)
 
 
+    # Section principale
+    st.header("Graphique de Distribution")
+    
+    # Sélectionner une colonne
+    numeric_columns = data.select_dtypes(include=["number"]).columns
+
+    # Création du graphique
+    selected_column = st.selectbox(
+        "Choisissez une colonne",
+        data.columns,
+        format_func=lambda x: f"{x} (Non numérique)" if x not in numeric_columns else x
+    )
+    if selected_column in numeric_columns:
+        chart = alt.Chart(data).mark_bar().encode(
+            x=alt.X(selected_column, bin=True),
+            y="count()",
+        )
+        st.altair_chart(chart, use_container_width=True)
+    else:
+        st.error("⚠️ La colonne sélectionnée n'est pas numérique et ne peut pas être visualisée.")
+  
     st.write("Analyse descriptive du dataframe")
     st.write(data.describe())
-
     
-    
+   
 with tabs_2:
     st.header("Visualisation")
-    data = load_data()
+    
 
     st.write("Graphique de distribution")
     select_2 = st.selectbox("Choisissez une colonne", options=data.columns)
@@ -58,11 +82,8 @@ with tabs_2:
 
     st.altair_chart(chart, use_container_width=True)
 
-
-
 with tabs_3:
     st.header("Modélisation")
-    data = load_data()
 
     target = st.selectbox("Choisissez une colonne cible", options=data.columns)
     y = data[target]
