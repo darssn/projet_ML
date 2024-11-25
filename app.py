@@ -45,24 +45,40 @@ with tabs_1:
     
 with tabs_2:
     st.header("Visualisation")
-    data = load_data()
 
     st.write("Graphique de distribution")
-    select_2 = st.selectbox("Choisissez une colonne", options=data.columns)
+    select_graph = st.selectbox("Choisissez un model de graphe", ["Horizontal Bar Chart", "Area Chart with Gradient"])
+    if select_graph != None :
+        select_2 = st.selectbox("Choisissez la première colonne", options=data.columns)
+        select_3 = st.selectbox("Choisissez la deuxième colonne", options=data.columns)
 
-    st.title(f"Moyenne de {select_2}, par rapport au type de vin")
-    chart = alt.Chart(data, height=500).mark_bar(size=30, color="red", fontSize=25).encode(
-        x=(f'average({select_2})'),
-        y='target',
-    )
+        match select_graph:
+            case "Horizontal Bar Chart":
+                st.title(f"Moyenne de {select_2}, par rapport au {select_3}")
+                chart = alt.Chart(data, height=500).mark_bar(size=10, color="red", fontSize=25).encode(
+                    x=(f'average({select_2})'),
+                    y=select_3,
+                )
 
-    st.altair_chart(chart, use_container_width=True)
-
+                st.altair_chart(chart, use_container_width=True)
+   
+            case "Area Chart with Gradient":
+                st.title(f"Comparaison du taux de {select_2}, par rapport au {select_3}")
+                if select_2 != 'target' and select_3 != 'target':
+                    data['taux'] = (data[select_2] / data[select_3]) * 100
+                    chart = alt.Chart(data).mark_circle(size=60).encode(
+                        x=select_2,
+                        y=select_3,
+                        color='target',
+                        tooltip=['target', select_2, select_3, 'taux']
+                    )
+                    st.altair_chart(chart, use_container_width=True)
+                    
+                            
 
 
 with tabs_3:
     st.header("Modélisation")
-    data = load_data()
 
     target = st.selectbox("Choisissez une colonne cible", options=data.columns)
     y = data[target]
