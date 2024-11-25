@@ -85,10 +85,14 @@ with tabs_3:
     st.write("Distribution des classes dans y_train :", y_train.value_counts())
     st.write("Distribution des classes dans y_test :", y_test.value_counts())
 
+    data = pd.get_dummies(data)
+    st.write(data)
+    st.write(data.dtypes)
+
 
     if st.button("Entrainer le modèle"):
         if model_choice == "Random Forest":
-            model = RandomForestRegressor(n_estimators=1, max_depth=60)
+            model = RandomForestClassifier(n_estimators=1, max_depth=60)
             
         
         model = model.fit(X_train, y_train)
