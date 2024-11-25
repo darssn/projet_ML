@@ -45,7 +45,6 @@ with tabs_1:
     
 with tabs_2:
     st.header("Visualisation")
-    data = load_data()
 
     st.write("Graphique de distribution")
     select_graph = st.selectbox("Choisissez un model de graphe", ["Horizontal Bar Chart", "Area Chart with Gradient"])
@@ -80,7 +79,6 @@ with tabs_2:
 
 with tabs_3:
     st.header("Modélisation")
-    data = load_data()
 
     target = st.selectbox("Choisissez une colonne cible", options=data.columns)
     y = data[target]
