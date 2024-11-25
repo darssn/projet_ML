@@ -78,3 +78,9 @@ streamlit run app.py
 - app.py : Fichier principal de l'application Streamlit.
 - requirements.txt : Liste des bibliothèques nécessaires.
 - vin.csv : Jeu de données utilisé pour le projet.
+
+
+## ✍️ Auteurs
+- Fatima-Zahra ZABAKA
+- Darcy NGUYEN
+- Victor LEBRETON 
