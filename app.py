@@ -27,10 +27,20 @@ def load_data():
 with tabs_1:
     st.header("Traitement de données")
     data = load_data()
-    st.write("Données du fichier")
+    st.subheader("Données sources")
     st.dataframe(data)
+     
+    st.divider() 
+
+    st.subheader("Modification des données")
+    data = st.data_editor(data)
+
+    st.divider() 
+
+
     
     # Suppression d'une colonne
+    st.subheader("Supprimer une ou plusieurs colonnes")
     select = st.multiselect("Sélectionner une colonne à supprimer", options=data.columns)
 
     if st.button(label="Supprimer"):
@@ -41,14 +51,53 @@ with tabs_1:
             st.success(f'La colonne {select} a bien été supprimée')
         st.write("Données mises à jour")
 
+    # # Imputation
+    # missing_values = data.columns[data.isnull().any()]
+    # if not missing_values.empty:
+    #     st.warning(f"Colonnes avec valeurs manquantes : {list(missing_values)}")
+    #     imputation_method = st.selectbox(
+    #     "Choisissez une méthode d'imputation",
+    #     ["Remplir par une constante", "Moyenne (numérique)", "Médiane (numérique)", "Mode (plus fréquent)", "Supprimer lignes/colonnes"])
+    #     selected_columns = st.multiselect( "Colonnes à imputer", options=list(missing_values), default=list(missing_values))
 
-    # Section principale
-    st.header("Graphique de Distribution")
+
+    #     if imputation_method == "Remplir par une constante":
+    #         constant_value = st.text_input("Entrez une constante pour remplir les valeurs manquantes", value="0")
+            
+
+    #     if st.button("Appliquer l'imputation"):
+    #         if imputation_method == "Remplir par une constante":
+    #             data[selected_columns] = data[selected_columns].fillna(constant_value)
+    #         elif imputation_method == "Moyenne (numérique)":
+    #             for col in selected_columns:
+    #                 if pd.api.types.is_numeric_dtype(data[col]):
+    #                     data[col] = data[col].fillna(data[col].mean())
+    #         elif imputation_method == "Médiane (numérique)":
+    #             for col in selected_columns:
+    #                 if pd.api.types.is_numeric_dtype(data[col]):
+    #                     data[col] = data[col].fillna(data[col].median())
+    #         elif imputation_method == "Mode (plus fréquent)":
+    #             for col in selected_columns:
+    #                 data[col] = data[col].fillna(data[col].mode()[0])
+    #         elif imputation_method == "Supprimer lignes/colonnes":
+    #             if st.radio("Supprimer", ["Lignes", "Colonnes"]) == "Lignes":
+    #                 data = data.dropna(subset=selected_columns)
+    #             else:
+    #                 data = data.drop(columns=selected_columns)
+            
+            
+    #         st.write("### Données après imputation")
+    #         st.dataframe(data)
+
+    # else:
+    #     st.write("Aucune colonne avec des valeurs manquantes.")
+
+
+
+    st.divider() 
     
-    # Sélectionner une colonne
+    st.header("Graphique de Distribution")    
     numeric_columns = data.select_dtypes(include=["number"]).columns
-
-    # Création du graphique
     selected_column = st.selectbox(
         "Choisissez une colonne",
         data.columns,
@@ -63,7 +112,9 @@ with tabs_1:
     else:
         st.error("⚠️ La colonne sélectionnée n'est pas numérique et ne peut pas être visualisée.")
   
-    st.write("Analyse descriptive du dataframe")
+    
+    st.divider() 
+    st.header("Analyse descriptive du dataframe")
     st.write(data.describe())
     
    
