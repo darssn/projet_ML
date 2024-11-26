@@ -59,50 +59,6 @@ with tabs_1:
             st.success(f'La colonne {select} a bien été supprimée')
         st.write("Données mises à jour")
 
-    # # Imputation
-    # missing_values = data.columns[data.isnull().any()]
-    # if not missing_values.empty:
-    #     st.warning(f"Colonnes avec valeurs manquantes : {list(missing_values)}")
-    #     imputation_method = st.selectbox(
-    #     "Choisissez une méthode d'imputation",
-    #     ["Remplir par une constante", "Moyenne (numérique)", "Médiane (numérique)", "Mode (plus fréquent)", "Supprimer lignes/colonnes"])
-    #     selected_columns = st.multiselect( "Colonnes à imputer", options=list(missing_values), default=list(missing_values))
-
-
-
-    #     if imputation_method == "Remplir par une constante":
-    #         constant_value = st.text_input("Entrez une constante pour remplir les valeurs manquantes", value="0")
-            
-
-    #     if st.button("Appliquer l'imputation"):
-    #         if imputation_method == "Remplir par une constante":
-    #             data[selected_columns] = data[selected_columns].fillna(constant_value)
-    #         elif imputation_method == "Moyenne (numérique)":
-    #             for col in selected_columns:
-    #                 if pd.api.types.is_numeric_dtype(data[col]):
-    #                     data[col] = data[col].fillna(data[col].mean())
-    #         elif imputation_method == "Médiane (numérique)":
-    #             for col in selected_columns:
-    #                 if pd.api.types.is_numeric_dtype(data[col]):
-    #                     data[col] = data[col].fillna(data[col].median())
-    #         elif imputation_method == "Mode (plus fréquent)":
-    #             for col in selected_columns:
-    #                 data[col] = data[col].fillna(data[col].mode()[0])
-    #         elif imputation_method == "Supprimer lignes/colonnes":
-    #             if st.radio("Supprimer", ["Lignes", "Colonnes"]) == "Lignes":
-    #                 data = data.dropna(subset=selected_columns)
-    #             else:
-    #                 data = data.drop(columns=selected_columns)
-            
-            
-    #         st.write("### Données après imputation")
-    #         st.dataframe(data)
-
-    # else:
-    #     st.write("Aucune colonne avec des valeurs manquantes.")
-
-
-
     st.divider() 
     
     st.header("Graphique de Distribution")    
@@ -190,10 +146,7 @@ with tabs_3:
 
         st.write("Taille de l'ensemble d'entraînement :", len(X_train))
         st.write("Taille de l'ensemble de test :", len(X_test))
-
-        # st.write("Distribution des classes dans y_train :", y_train.value_counts())
-        # st.write("Distribution des classes dans y_test :", y_test.value_counts())
-        
+       
         
         if not missing_values.empty:
             st.error(f"Pour entraîner le modèle, veuillez remplir le ou les champs manquants, ou supprimer la colonne {list(missing_values)}, dans l'onglet Transformation de données.")
@@ -220,41 +173,25 @@ with tabs_3:
                             precision, recall, fscore, _ = score(y_test, result, average='weighted')
                             accuracy = accuracy_score(y_test, result)                        
                             metrics_bool = True
-
-                            # Affichage des résultats
-                            # st.write("**Métriques du modèle :**")
-                            # st.write(f"- Precision : {round(precision, 3)}")
-                            # st.write(f"- Recall : {round(recall, 3)}")
-                            # st.write(f"- F1-score : {round(fscore, 3)}")
-                            # st.write(f"- Accuracy : {round(accuracy, 3)}")
+                        
                         else :          
                         # Access the OOB Score
-                            oob_score = model.oob_score_
-                            # st.write(f'OOB Score: {oob_score:.4f}')                        
-                            oob_error = 1 - oob_score
-                            # st.write(f'OOB error: {oob_error:.4f}')                        
-                            # Evaluating the model
-                            mse = mean_squared_error(y_test, result)
-                            # st.write(f'Mean Squared Error: {mse:.4f}')
-                            r2 = r2_score(y_test, result)
-                            # st.write(f'R-squared: {r2:.4f}')
+                            oob_score = model.oob_score_                                                 
+                            oob_error = 1 - oob_score                           
+                            mse = mean_squared_error(y_test, result)                           
+                            r2 = r2_score(y_test, result)                           
                             
                             metrics_bool = True
                 
-                    case "Linear regression":                                                               
-                        # st.write("Linear regression")                    
+                    case "Linear regression":                                                                                 
                         lm = LinearRegression()                      
-                        lm.fit(X_train,y_train)                    
-                        # st.write(lm.coef_)                    
-                        prediction = lm.predict(X_test)                    
+                        lm.fit(X_train,y_train)                        
+                        prediction = lm.predict(X_test)                        
                         mae = metrics.mean_absolute_error(y_test,prediction)            
                         mse = metrics.mean_squared_error(y_test,prediction)
-                        rmse = np.sqrt(metrics.mean_squared_error(y_test, prediction))                   
-                        metrics_bool = True                    
-                        # st.write(f"- MAE : {mae}")
-                        # st.write(f"- MSE : {mse}")
-                        # st.write(f"- RMSE : {rmse}")
-                    
+                        r2 = r2_score(y_test, prediction)
+                        rmse = np.sqrt(metrics.mean_squared_error(y_test, prediction))                 
+                   
                     
 with tabs_4:
     st.header("Évaluation")
@@ -293,13 +230,15 @@ with tabs_4:
                                  
                     # Evaluating the model                    
             case "Linear regression": 
-                col1, col2, col3 = st.columns(3)   
+                col1, col2, col3, col4 = st.columns(4)   
                 with col1:
-                    st.metric(label="- MAE", value=(round(mae, 4)), delta=+1.5, delta_color="inverse")
+                    st.metric(label="- Mean Absolute Error", value=(round(mae, 4)), delta=+1.5, delta_color="inverse")
                 with col2:
-                    st.metric(label="- MSE", value=(round(mse,4)), delta=-0.5, delta_color="inverse")
+                    st.metric(label="- Mean Squared Error", value=(round(mse,4)), delta=-0.5, delta_color="inverse")
                 with col3:
-                    st.metric(label="- RMSE", value=(round(rmse,4)), delta=-1.5, delta_color="inverse")            
+                    st.metric(label="- R-squared", value=(round(r2,4)), delta=-1.5, delta_color="inverse")    
+                with col4:
+                    st.metric(label="- Root Mean Squared Error", value=(round(rmse,4)), delta=-1.5, delta_color="inverse")        
 
     else:
         st.warning("Aucun modèle n'a été entraîné. Veuillez entraîner un modèle avant d'évaluer.")
