@@ -10,6 +10,7 @@ from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
 from sklearn import metrics
 
+
 st.set_page_config(
     page_title="Projet ML",
     page_icon=":shark:",
@@ -120,11 +121,6 @@ with tabs_3:
         st.write("Taille de l'ensemble d'entraînement :", len(X_train))
         st.write("Taille de l'ensemble de test :", len(X_test))
 
-        st.write("Distribution des classes dans y_train :", y_train.value_counts())
-        st.write("Distribution des classes dans y_test :", y_test.value_counts())
-
-        
-
         if st.button("Entrainer le modèle"):
             
             match model_choice:
@@ -143,7 +139,6 @@ with tabs_3:
 
                     X_test["guess_target"] = result
                     X_test["target"] = y_test
-                    st.write(X_test)
 
                     if type_data :
                         # Calcul des métriques
@@ -176,26 +171,25 @@ with tabs_3:
                         metrics_bool = True
             
                 case "Linear regression":
-                                                               
-                    st.write("Linear regression")
+                                                            
                     
                     lm = LinearRegression()  
                     
                     lm.fit(X_train,y_train)
                     
-                    st.write(lm.coef_)
-                    
                     prediction = lm.predict(X_test)
                     
                     mae = metrics.mean_absolute_error(y_test,prediction)            
                     mse = metrics.mean_squared_error(y_test,prediction)
+                    r2 = r2_score(y_test, prediction)
                     rmse = np.sqrt(metrics.mean_squared_error(y_test, prediction))
                    
                     metrics_bool = True
                     
-                    st.write(f"- MAE : {mae}")
-                    st.write(f"- MSE : {mse}")
-                    st.write(f"- RMSE : {rmse}")
+                    st.write(f"- Mean Absolute Error : {mae}")
+                    st.write(f"- Mean Squared Error : {mse}")
+                    st.write(f"- R-squared : {r2}")
+                    st.write(f"- Root Mean Squared Error : {rmse}")
                     
                     
 with tabs_4:
@@ -225,9 +219,10 @@ with tabs_4:
                     
             case "Linear regression":
                 
-                    st.write(f"- MAE : {mae}")
-                    st.write(f"- MSE : {mse}")
-                    st.write(f"- RMSE : {rmse}")
-
+                    st.write(f"- Mean Absolute Error : {mae}")
+                    st.write(f"- Mean Squared Error : {mse}")
+                    st.write(f"- R-squared : {r2}")
+                    st.write(f"- Root Mean Squared Error : {rmse}")
+                    
     else:
         st.warning("Aucun modèle n'a été entraîné. Veuillez entraîner un modèle avant d'évaluer.")
