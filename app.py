@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.metrics import precision_recall_fscore_support as score
+from sklearn.preprocessing import OneHotEncoder
 from sklearn.metrics import mean_squared_error, r2_score
 from sklearn.linear_model import LinearRegression
 from sklearn import metrics
@@ -26,31 +27,108 @@ def load_data():
     data = data.drop(columns=['Unnamed: 0'])
     return data
 
+
 # Traitement de données 
 with tabs_1:
     st.header("Traitement de données")
     data = load_data()
+    st.subheader("Données sources")
 
-    st.write("Données du fichier")
     st.dataframe(data)
+     
+    st.divider() 
 
+    st.subheader("Modification des données")
+    data = st.data_editor(data)
+
+    missing_values = data.columns[data.isnull().any()]
+    if not missing_values.empty:
+        st.warning(f"Colonnes avec valeurs manquantes : {list(missing_values)}")
+
+    st.divider() 
+    
+    # Suppression d'une colonne
+    st.subheader("Supprimer une ou plusieurs colonnes")
     select = st.multiselect("Sélectionner une colonne à supprimer", options=data.columns)
 
     if st.button(label="Supprimer"):
         data = data.drop(columns=select)
-        st.write(f'La colonne {select} à bien été supprimée')
+        if len(select) > 1:
+            st.success(f'Les colonnes {select} ont bien été supprimées')
+        else:
+            st.success(f'La colonne {select} a bien été supprimée')
         st.write("Données mises à jour")
-        st.dataframe(data)
+
+    # # Imputation
+    # missing_values = data.columns[data.isnull().any()]
+    # if not missing_values.empty:
+    #     st.warning(f"Colonnes avec valeurs manquantes : {list(missing_values)}")
+    #     imputation_method = st.selectbox(
+    #     "Choisissez une méthode d'imputation",
+    #     ["Remplir par une constante", "Moyenne (numérique)", "Médiane (numérique)", "Mode (plus fréquent)", "Supprimer lignes/colonnes"])
+    #     selected_columns = st.multiselect( "Colonnes à imputer", options=list(missing_values), default=list(missing_values))
 
 
-    st.write("Analyse descriptive du dataframe")
+
+    #     if imputation_method == "Remplir par une constante":
+    #         constant_value = st.text_input("Entrez une constante pour remplir les valeurs manquantes", value="0")
+            
+
+    #     if st.button("Appliquer l'imputation"):
+    #         if imputation_method == "Remplir par une constante":
+    #             data[selected_columns] = data[selected_columns].fillna(constant_value)
+    #         elif imputation_method == "Moyenne (numérique)":
+    #             for col in selected_columns:
+    #                 if pd.api.types.is_numeric_dtype(data[col]):
+    #                     data[col] = data[col].fillna(data[col].mean())
+    #         elif imputation_method == "Médiane (numérique)":
+    #             for col in selected_columns:
+    #                 if pd.api.types.is_numeric_dtype(data[col]):
+    #                     data[col] = data[col].fillna(data[col].median())
+    #         elif imputation_method == "Mode (plus fréquent)":
+    #             for col in selected_columns:
+    #                 data[col] = data[col].fillna(data[col].mode()[0])
+    #         elif imputation_method == "Supprimer lignes/colonnes":
+    #             if st.radio("Supprimer", ["Lignes", "Colonnes"]) == "Lignes":
+    #                 data = data.dropna(subset=selected_columns)
+    #             else:
+    #                 data = data.drop(columns=selected_columns)
+            
+            
+    #         st.write("### Données après imputation")
+    #         st.dataframe(data)
+
+    # else:
+    #     st.write("Aucune colonne avec des valeurs manquantes.")
+
+
+
+    st.divider() 
+    
+    st.header("Graphique de Distribution")    
+    numeric_columns = data.select_dtypes(include=["number"]).columns
+    selected_column = st.selectbox(
+        "Choisissez une colonne",
+        data.columns,
+        format_func=lambda x: f"{x} (Non numérique)" if x not in numeric_columns else x
+    )
+    if selected_column in numeric_columns:
+        chart = alt.Chart(data).mark_bar().encode(
+            x=alt.X(selected_column, bin=True),
+            y="count()",
+        )
+        st.altair_chart(chart, use_container_width=True)
+    else:
+        st.error("⚠️ La colonne sélectionnée n'est pas numérique et ne peut pas être visualisée.")
+  
+    
+    st.divider() 
+    st.header("Analyse descriptive du dataframe")
     st.write(data.describe())
-
     
-    
+   
 with tabs_2:
     st.header("Visualisation")
-
     st.write("Graphique de distribution")
     select_graph = st.selectbox("Choisissez un model de graphe", ["Horizontal Bar Chart", "Area Chart with Gradient"])
     if select_graph != None :
@@ -78,9 +156,7 @@ with tabs_2:
                         tooltip=['target', select_2, select_3, 'taux']
                     )
                     st.altair_chart(chart, use_container_width=True)
-                    
-                            
-
+                                   
  
 with tabs_3:
     st.header("Modélisation")
@@ -88,17 +164,11 @@ with tabs_3:
     metrics_bool = False
     model_choice = None
     eval = True
-    
 
     target = st.selectbox("Choisissez une colonne cible", options=data.columns)
-  
-    
     y = data[target]
     type_data = data[target].dtype == 'object' or data[target].dtype == 'string'
-
-
     model_choice = st.selectbox("Choisissez un algorithme", ["Random Forest", "Linear regression"])
-    
     
     if model_choice == "Linear regression" and type_data :
         st.error("La colonne selectionné n'est pas numerique et ne peut pas etre entrainé")
@@ -161,10 +231,12 @@ with tabs_3:
                         oob_error = 1 - oob_score
                         st.write(f'OOB error: {oob_error:.4f}')
                         
-                        # Evaluating the model
-                        mse = mean_squared_error(y_test, result)
-                        st.write(f'Mean Squared Error: {mse:.4f}')
-
+                        model = model.fit(X_train, y_train)
+                        st.success("Modèle entraîné avec succès")
+                        result = model.predict(X_test)
+                        X_test["guess_target"] = result
+                        X_test["target"] = y_test
+                        st.write(X_test)
                         r2 = r2_score(y_test, result)
                         st.write(f'R-squared: {r2:.4f}')
                         
@@ -196,11 +268,8 @@ with tabs_4:
     st.header("Évaluation")
     
     if metrics_bool :
-
-        match model_choice:
-            
-            case "Random Forest":
-     
+        match model_choice:          
+            case "Random Forest":   
                 if type_data :
                     # Affichage des résultat
                     st.write("**Métriques du modèle :**")
@@ -216,7 +285,7 @@ with tabs_4:
                     # Evaluating the model
                     st.write(f'Mean Squared Error: {mse:.4f}')
                     st.write(f'R-squared: {r2:.4f}')
-                    
+
             case "Linear regression":
                 
                     st.write(f"- Mean Absolute Error : {mae}")
@@ -224,5 +293,6 @@ with tabs_4:
                     st.write(f"- R-squared : {r2}")
                     st.write(f"- Root Mean Squared Error : {rmse}")
                     
+
     else:
         st.warning("Aucun modèle n'a été entraîné. Veuillez entraîner un modèle avant d'évaluer.")
