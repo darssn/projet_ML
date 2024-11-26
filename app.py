@@ -242,18 +242,18 @@ with tabs_3:
                             metrics_bool = True
                 
                     case "Linear regression":                                                               
-                        st.write("Linear regression")                    
+                        # st.write("Linear regression")                    
                         lm = LinearRegression()                      
                         lm.fit(X_train,y_train)                    
-                        st.write(lm.coef_)                    
+                        # st.write(lm.coef_)                    
                         prediction = lm.predict(X_test)                    
                         mae = metrics.mean_absolute_error(y_test,prediction)            
                         mse = metrics.mean_squared_error(y_test,prediction)
                         rmse = np.sqrt(metrics.mean_squared_error(y_test, prediction))                   
                         metrics_bool = True                    
-                        st.write(f"- MAE : {mae}")
-                        st.write(f"- MSE : {mse}")
-                        st.write(f"- RMSE : {rmse}")
+                        # st.write(f"- MAE : {mae}")
+                        # st.write(f"- MSE : {mse}")
+                        # st.write(f"- RMSE : {rmse}")
                     
                     
 with tabs_4:
