@@ -191,20 +191,45 @@ with tabs_3:
         st.write("Taille de l'ensemble d'entraînement :", len(X_train))
         st.write("Taille de l'ensemble de test :", len(X_test))
 
-        # st.write("Distribution des classes dans y_train :", y_train.value_counts())
-        # st.write("Distribution des classes dans y_test :", y_test.value_counts())
+        if st.button("Entrainer le modèle"):
+            
+            match model_choice:
+                
+                case "Random Forest":
         
-        
-        if not missing_values.empty:
-            st.error(f"Pour entraîner le modèle, veuillez remplir le ou les champs manquants, ou supprimer la colonne {list(missing_values)}, dans l'onglet Transformation de données.")
-        else:
-            if st.button("Entrainer le modèle"):            
-                match model_choice:                
-                    case "Random Forest":        
-                        if type_data:
-                            model = RandomForestClassifier(n_estimators=100, max_depth=60)
-                        else:
-                            model = RandomForestRegressor(n_estimators=100, max_depth=60,oob_score=True)
+                    if type_data:
+                        model = RandomForestClassifier(n_estimators=100, max_depth=60)
+                    else:
+                        model = RandomForestRegressor(n_estimators=100, max_depth=60,oob_score=True)
+                    
+                    model = model.fit(X_train, y_train)
+                    st.success("Modèle entraîné avec succès")
+
+                    result = model.predict(X_test)
+
+                    X_test["guess_target"] = result
+                    X_test["target"] = y_test
+
+                    if type_data :
+                        # Calcul des métriques
+                        precision, recall, fscore, _ = score(y_test, result, average='weighted')
+                        accuracy = accuracy_score(y_test, result)
+                        
+                        metrics_bool = True
+
+                        # Affichage des résultats
+                        st.write("**Métriques du modèle :**")
+                        st.write(f"- Precision : {round(precision, 3)}")
+                        st.write(f"- Recall : {round(recall, 3)}")
+                        st.write(f"- F1-score : {round(fscore, 3)}")
+                        st.write(f"- Accuracy : {round(accuracy, 3)}")
+                    else :          
+                    # Access the OOB Score
+                        oob_score = model.oob_score_
+                        st.write(f'OOB Score: {oob_score:.4f}')
+                        
+                        oob_error = 1 - oob_score
+                        st.write(f'OOB error: {oob_error:.4f}')
                         
                         model = model.fit(X_train, y_train)
                         st.success("Modèle entraîné avec succès")
@@ -212,46 +237,31 @@ with tabs_3:
                         X_test["guess_target"] = result
                         X_test["target"] = y_test
                         st.write(X_test)
-
-                        if type_data :
-                            # Calcul des métriques
-                            precision, recall, fscore, _ = score(y_test, result, average='weighted')
-                            accuracy = accuracy_score(y_test, result)                        
-                            metrics_bool = True
-
-                            # Affichage des résultats
-                            st.write("**Métriques du modèle :**")
-                            st.write(f"- Precision : {round(precision, 3)}")
-                            st.write(f"- Recall : {round(recall, 3)}")
-                            st.write(f"- F1-score : {round(fscore, 3)}")
-                            st.write(f"- Accuracy : {round(accuracy, 3)}")
-                        else :          
-                        # Access the OOB Score
-                            oob_score = model.oob_score_
-                            st.write(f'OOB Score: {oob_score:.4f}')                        
-                            oob_error = 1 - oob_score
-                            st.write(f'OOB error: {oob_error:.4f}')                        
-                            # Evaluating the model
-                            mse = mean_squared_error(y_test, result)
-                            st.write(f'Mean Squared Error: {mse:.4f}')
-                            r2 = r2_score(y_test, result)
-                            st.write(f'R-squared: {r2:.4f}')
-                            
-                            metrics_bool = True
-                
-                    case "Linear regression":                                                               
-                        st.write("Linear regression")                    
-                        lm = LinearRegression()                      
-                        lm.fit(X_train,y_train)                    
-                        st.write(lm.coef_)                    
-                        prediction = lm.predict(X_test)                    
-                        mae = metrics.mean_absolute_error(y_test,prediction)            
-                        mse = metrics.mean_squared_error(y_test,prediction)
-                        rmse = np.sqrt(metrics.mean_squared_error(y_test, prediction))                   
-                        metrics_bool = True                    
-                        st.write(f"- MAE : {mae}")
-                        st.write(f"- MSE : {mse}")
-                        st.write(f"- RMSE : {rmse}")
+                        r2 = r2_score(y_test, result)
+                        st.write(f'R-squared: {r2:.4f}')
+                        
+                        metrics_bool = True
+            
+                case "Linear regression":
+                                                            
+                    
+                    lm = LinearRegression()  
+                    
+                    lm.fit(X_train,y_train)
+                    
+                    prediction = lm.predict(X_test)
+                    
+                    mae = metrics.mean_absolute_error(y_test,prediction)            
+                    mse = metrics.mean_squared_error(y_test,prediction)
+                    r2 = r2_score(y_test, prediction)
+                    rmse = np.sqrt(metrics.mean_squared_error(y_test, prediction))
+                   
+                    metrics_bool = True
+                    
+                    st.write(f"- Mean Absolute Error : {mae}")
+                    st.write(f"- Mean Squared Error : {mse}")
+                    st.write(f"- R-squared : {r2}")
+                    st.write(f"- Root Mean Squared Error : {rmse}")
                     
                     
 with tabs_4:
@@ -275,11 +285,14 @@ with tabs_4:
                     # Evaluating the model
                     st.write(f'Mean Squared Error: {mse:.4f}')
                     st.write(f'R-squared: {r2:.4f}')
+
+            case "Linear regression":
+                
+                    st.write(f"- Mean Absolute Error : {mae}")
+                    st.write(f"- Mean Squared Error : {mse}")
+                    st.write(f"- R-squared : {r2}")
+                    st.write(f"- Root Mean Squared Error : {rmse}")
                     
-            case "Linear regression":                
-                    st.write(f"- MAE : {mae}")
-                    st.write(f"- MSE : {mse}")
-                    st.write(f"- RMSE : {rmse}")
 
     else:
         st.warning("Aucun modèle n'a été entraîné. Veuillez entraîner un modèle avant d'évaluer.")
