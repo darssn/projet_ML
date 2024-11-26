@@ -209,9 +209,11 @@ with tabs_3:
                         model = model.fit(X_train, y_train)
                         st.success("Modèle entraîné avec succès")
                         result = model.predict(X_test)
-                        X_test["guess_target"] = result
+                        X_test["Prévision_"+ target] = result
                         X_test["target"] = y_test
                         st.write(X_test)
+
+                        st.info("Rendez-vous dans l'onglet Evaluation pour monitorer les résultats")
 
                         if type_data :
                             # Calcul des métriques
@@ -220,22 +222,22 @@ with tabs_3:
                             metrics_bool = True
 
                             # Affichage des résultats
-                            st.write("**Métriques du modèle :**")
-                            st.write(f"- Precision : {round(precision, 3)}")
-                            st.write(f"- Recall : {round(recall, 3)}")
-                            st.write(f"- F1-score : {round(fscore, 3)}")
-                            st.write(f"- Accuracy : {round(accuracy, 3)}")
+                            # st.write("**Métriques du modèle :**")
+                            # st.write(f"- Precision : {round(precision, 3)}")
+                            # st.write(f"- Recall : {round(recall, 3)}")
+                            # st.write(f"- F1-score : {round(fscore, 3)}")
+                            # st.write(f"- Accuracy : {round(accuracy, 3)}")
                         else :          
                         # Access the OOB Score
                             oob_score = model.oob_score_
-                            st.write(f'OOB Score: {oob_score:.4f}')                        
+                            # st.write(f'OOB Score: {oob_score:.4f}')                        
                             oob_error = 1 - oob_score
-                            st.write(f'OOB error: {oob_error:.4f}')                        
+                            # st.write(f'OOB error: {oob_error:.4f}')                        
                             # Evaluating the model
                             mse = mean_squared_error(y_test, result)
-                            st.write(f'Mean Squared Error: {mse:.4f}')
+                            # st.write(f'Mean Squared Error: {mse:.4f}')
                             r2 = r2_score(y_test, result)
-                            st.write(f'R-squared: {r2:.4f}')
+                            # st.write(f'R-squared: {r2:.4f}')
                             
                             metrics_bool = True
                 
@@ -261,25 +263,43 @@ with tabs_4:
         match model_choice:          
             case "Random Forest":   
                 if type_data :
+                    col1, col2, col3, col4 = st.columns(4)
                     # Affichage des résultat
                     st.write("**Métriques du modèle :**")
-                    st.write(f"- Precision : {round(precision, 3)}")
-                    st.write(f"- Recall : {round(recall, 3)}")
-                    st.write(f"- F1-score : {round(fscore, 3)}")
-                    st.write(f"- Accuracy : {round(accuracy, 3)}")
-                else :          
+                    with col1:
+                        st.metric(label="- Precision", value=round(precision, 3), delta=+1.5, delta_color="inverse")
+                    with col2:
+                        st.metric(label="- Recall", value=(round(recall,3)), delta=-2, delta_color="inverse")
+                    with col3:
+                        st.metric(label="- F1-score", value=(round(fscore,3)), delta=+0.5, delta_color="inverse")
+                    with col4:
+                        st.metric(label="- Accuracy", value=(round(accuracy,3)), delta=+3.5, delta_color="inverse")
+
+                else :
+                    with st.container():          
                     # Access the OOB Score
-                    st.write(f'OOB Score: {oob_score:.4f}')
-                    st.write(f'OOB error: {oob_error:.4f}')   
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.metric(label="- OOB Score", value=(round(oob_score, 4)), delta=+0.5, delta_color="inverse")
+
+                        with col2:
+                            st.metric(label="- OOB error", value=(round(oob_error,4)), delta=+0.5, delta_color="inverse")
+
+                        with col3:
+                            st.metric(label="- Mean Squared Error", value=(round(mse,4)), delta=+0.5, delta_color="inverse")
+
+                        with col4:
+                            st.metric(label="- R-squared", value=(round(r2,4)), delta=+0.5, delta_color="inverse")
                                  
-                    # Evaluating the model
-                    st.write(f'Mean Squared Error: {mse:.4f}')
-                    st.write(f'R-squared: {r2:.4f}')
-                    
-            case "Linear regression":                
-                    st.write(f"- MAE : {mae}")
-                    st.write(f"- MSE : {mse}")
-                    st.write(f"- RMSE : {rmse}")
+                    # Evaluating the model                    
+            case "Linear regression": 
+                col1, col2, col3 = st.columns(3)   
+                with col1:
+                    st.metric(label="- MAE", value=(round(mae, 4)), delta=+1.5, delta_color="inverse")
+                with col2:
+                    st.metric(label="- MSE", value=(round(mse,4)), delta=-0.5, delta_color="inverse")
+                with col3:
+                    st.metric(label="- RMSE", value=(round(rmse,4)), delta=-1.5, delta_color="inverse")            
 
     else:
         st.warning("Aucun modèle n'a été entraîné. Veuillez entraîner un modèle avant d'évaluer.")
