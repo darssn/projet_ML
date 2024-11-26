@@ -88,8 +88,8 @@ with tabs_2:
     st.write("Graphique de distribution")
     select_graph = st.selectbox("Choisissez un model de graphe", ["Horizontal Bar Chart", "Area Chart with Gradient"])
     if select_graph != None :
-        select_2 = st.selectbox("Choisissez la première colonne", options=data.columns)
-        select_3 = st.selectbox("Choisissez la deuxième colonne", options=data.columns)
+        select_2 = st.selectbox("Choisissez la première colonne", options=data.columns, index=0)
+        select_3 = st.selectbox("Choisissez la deuxième colonne", options=data.columns, index=len(data.columns)-1)
 
         match select_graph:
             case "Horizontal Bar Chart":
@@ -112,6 +112,8 @@ with tabs_2:
                         tooltip=['target', select_2, select_3, 'taux']
                     )
                     st.altair_chart(chart, use_container_width=True)
+                else:
+                    st.warning("Veuillez sélectionner une valeur numérique")
 
     
     st.title("Graphique represente la moyenne des proprietes dans chanque type de vin")
