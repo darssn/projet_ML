@@ -1,7 +1,7 @@
 # Projet Machine Learning avec Streamlit
 
 Ce projet est une application interactive développée avec **Streamlit**, qui illustre un pipeline complet de Machine Learning (ou Deep Learning). L'application se compose de plusieurs étapes : traitement des données, visualisation, modélisation, et évaluation.
-
+Vous retrouverez la documentation utilisateur juste ici --> [a link](https://github.com/darssn/projet_ML/blob/main/Doc%20User%20-%20Projet%20ML.pdf)
 ---
 
 ## 📋 Fonctionnalités
