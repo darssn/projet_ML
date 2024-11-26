@@ -112,8 +112,20 @@ with tabs_2:
                         tooltip=['target', select_2, select_3, 'taux']
                     )
                     st.altair_chart(chart, use_container_width=True)
-                                   
- 
+
+    
+    st.title("Graphique represente la moyenne des proprietes dans chanque type de vin")
+
+    meanProperties = data.groupby('target').mean().reset_index()
+    #creation d'un nouveau tableau avec trois colonnes
+    newDf = pd.melt(meanProperties,id_vars=['target'],value_vars=['alcohol','malic_acid','ash','alcalinity_of_ash','magnesium','total_phenols','flavanoids','nonflavanoid_phenols','proanthocyanins','color_intensity','hue','od280/od315_of_diluted_wines','proline'],ignore_index=False, var_name='Properties', value_name='Moyenne des proprietes')             
+    chartmean=alt.Chart(newDf, height=500).mark_bar().encode(
+    x="Moyenne des proprietes",
+    y="target",
+    color="Properties"
+    )     
+    st.altair_chart(chartmean, use_container_width=True)
+    
 with tabs_3:
     st.header("Modélisation")
     
