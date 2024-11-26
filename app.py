@@ -33,10 +33,16 @@ with tabs_1:
     st.divider() 
 
     st.subheader("Modification des données")
+
+    missing_values = data.columns[data.isnull().any()]
+    if not missing_values.empty:
+        st.info(f"Colonnes avec valeurs manquantes : {list(missing_values)}", icon="ℹ️")
+
     data = st.data_editor(data)
 
     st.divider() 
 
+    
 
     
     # Suppression d'une colonne
@@ -120,33 +126,33 @@ with tabs_1:
    
 with tabs_2:
     st.header("Visualisation")
-    st.write("Graphique de distribution")
-    select_graph = st.selectbox("Choisissez un model de graphe", ["Horizontal Bar Chart", "Area Chart with Gradient"])
-    if select_graph != None :
-        select_2 = st.selectbox("Choisissez la première colonne", options=data.columns)
-        select_3 = st.selectbox("Choisissez la deuxième colonne", options=data.columns)
+    with st.container(border=True):
+        select_graph = st.selectbox("Choisissez un model de graphe", ["Horizontal Bar Chart", "Area Chart with Gradient"])
+        if select_graph != None :
+            select_2 = st.selectbox("Choisissez la première colonne", options=data.columns)
+            select_3 = st.selectbox("Choisissez la deuxième colonne", options=data.columns)
 
-        match select_graph:
-            case "Horizontal Bar Chart":
-                st.title(f"Moyenne de {select_2}, par rapport au {select_3}")
-                chart = alt.Chart(data, height=500).mark_bar(size=10, color="red", fontSize=25).encode(
-                    x=(f'average({select_2})'),
-                    y=select_3,
-                )
-
-                st.altair_chart(chart, use_container_width=True)
-   
-            case "Area Chart with Gradient":
-                st.title(f"Comparaison du taux de {select_2}, par rapport au {select_3}")
-                if select_2 != 'target' and select_3 != 'target':
-                    data['taux'] = (data[select_2] / data[select_3]) * 100
-                    chart = alt.Chart(data).mark_circle(size=60).encode(
-                        x=select_2,
+            match select_graph:
+                case "Horizontal Bar Chart":
+                    st.title(f"Moyenne de {select_2}, par rapport au {select_3}")
+                    chart = alt.Chart(data, height=500).mark_bar().encode(
+                        x=(f'average({select_2})'),
                         y=select_3,
-                        color='target',
-                        tooltip=['target', select_2, select_3, 'taux']
-                    )
+                    ).properties(height=alt.Step(10))
+
                     st.altair_chart(chart, use_container_width=True)
+    
+                case "Area Chart with Gradient":
+                    st.title(f"Comparaison du taux de {select_2}, par rapport au {select_3}")
+                    if select_2 != 'target' and select_3 != 'target':
+                        data['taux'] = (data[select_2] / data[select_3]) * 100
+                        chart = alt.Chart(data).mark_circle(size=60).encode(
+                            x=select_2,
+                            y=select_3,
+                            color='target',
+                            tooltip=['target', select_2, select_3, 'taux']
+                        )
+                        st.altair_chart(chart, use_container_width=True)
                     
                            
 with tabs_3:
